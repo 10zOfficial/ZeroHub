@@ -1,5 +1,5 @@
 if game.PlaceId == 5702949743 then
-	loadstring(game:HttpGet('http://tenz.ga/zero/impostor'))()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/10zOfficial/ZeroHub/master/impostor'))()
 elseif game.PlaceId == 537413528 then
-	loadstring(game:HttpGet('http://tenz.ga/zero/babft'))()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/10zOfficial/ZeroHub/master/babft'))()
 end
