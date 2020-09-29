@@ -1,0 +1,274 @@
+game:GetService('RunService').Stepped:connect(function()
+	if _G.NoClip then
+		game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.Head.CanCollide = false
+		game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+	end
+end)
+
+local Ui = loadstring(game:HttpGet("http://tenz.ga/libraries/Zero"))()
+local Main = Ui:Main('Zero Hub')
+local b = Main:Tab('Players')
+local a = b:Section('Local Player')
+
+a:Create(
+    'slider',
+    'Speed',
+    function(a)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = a
+    end,
+    {
+        min=16,
+        max=200
+    }
+)
+game:GetService('RunService').Stepped:connect(function()
+    if game.Players.LocalPlayer.Character.Humanoid then
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = _G.JumpPower or 50
+    end
+end)
+
+a:Create(
+    'slider',
+    'Jump',
+    function(a)
+        _G.JumpPower = a
+    end,
+    {
+        min=50,
+        max=200
+    }
+)
+
+a:Create(
+    'toggle',
+    'Fly',
+    function(state) -- Fly used from Calamity. Main Credits to rocky2cmd!
+        repeat wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:findFirstChild("Head") and game.Players.LocalPlayer.Character:findFirstChild("Humanoid")
+		local Mouse = game.Players.LocalPlayer:GetMouse()
+		repeat wait() until Mouse
+		local Player = game.Players.LocalPlayer
+		local HumRoot = Player.Character.HumanoidRootPart
+		local Hum = Player.Character.Humanoid
+		isFlying = false
+		local SteerSpeed = 50
+		local Steer = {f = 0, b = 0, l = 0, r = 0}
+		local BackSteer = {f = 0, b = 0, l = 0, r = 0}
+		local MaxSpeed = 200
+	
+		function Fly()
+			local Gyro = Instance.new('BodyGyro', HumRoot)
+				Gyro.P = 9e4
+				Gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+				Gyro.CFrame = HumRoot.CFrame
+			local Velocity = Instance.new('BodyVelocity', HumRoot)
+				Velocity.Velocity = Vector3.new(0,0.1,0)
+				Velocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
+			repeat wait()
+				Hum.PlatformStand = true
+				if Steer.l + Steer.r ~= 0 or Steer.f + Steer.b ~= 0 then
+					SteerSpeed = 50
+					if SteerSpeed > MaxSpeed then
+						SteerSpeed = MaxSpeed
+					end
+				elseif not (Steer.l + Steer.r ~= 0 or Steer.f + Steer.b ~= 0) and speed ~= 0 then
+					SteerSpeed = SteerSpeed-50
+					if SteerSpeed < 0 then
+						SteerSpeed = 0    
+					end
+				end
+				if (Steer.l + Steer.r) ~= 0 or (Steer.f + Steer.b) ~= 0 then
+					Velocity.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (Steer.f+Steer.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(Steer.l+Steer.r,(Steer.f+Steer.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * SteerSpeed
+					BackSteer = {f = Steer.f ,b = Steer.b ,l = Steer.l, r = Steer.r}
+				elseif (Steer.l + Steer.r == 0 or Steer.f + Steer.b == 0) and SteerSpeed ~= 0 then
+					Velocity.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (BackSteer.f+BackSteer.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(BackSteer.l+BackSteer.r,(BackSteer.f+BackSteer.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * SteerSpeed
+				else
+					Velocity.Velocity = Vector3.new(0,0.1,0)
+				end
+				Gyro.CFrame = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((Steer.f+Steer.b)*50*SteerSpeed/MaxSpeed),0,0)
+			until not isFlying
+			local SteerSpeed = 0
+			local Steer = {F = 0,B = 0,L = 0,R = 0}
+			local BackSteer = {F = 0,B = 0,L = 0,R = 0}
+			Gyro:Destroy()
+			Velocity:Destroy()
+			Hum.PlatformStand = false
+		end
+	
+		local Mouse = Player:GetMouse()
+	
+		Mouse.KeyDown:Connect(function(Key)
+			if Key:lower() == "w" then
+				isWDown = true
+				Steer.f = 1
+			elseif Key:lower() == "a" then
+				isADown = true
+				Steer.l = -1
+			elseif Key:lower() == "s" then
+				isSDown = true
+				Steer.b = -1
+			elseif Key:lower() == "d" then
+				isSDown = true
+				Steer.r = 1
+			end
+		end)
+		Mouse.KeyUp:Connect(function(Key)
+			if Key:lower() == "w" then
+				isWDown = false
+				Steer.f = 0
+			elseif Key:lower() == "a" then
+				isADown = false
+				Steer.l = 0
+			elseif Key:lower() == "s" then
+				isSDown = false
+				Steer.b = 0
+			elseif Key:lower() == "d" then
+				isDDown = false
+				Steer.r = 0
+			end
+		end)
+	
+		if not state then
+			isFlying = false
+			HumRoot.BodyGyro:Destroy()
+			HumRoot.BodyVelocity:Destroy()
+			Hum.PlatformStand = false
+		else
+			isFlying = true
+			Fly()
+		end
+    end
+)
+
+a:Create(
+    'toggle',
+    'NoClip',
+    function(state)
+        _G.NoClip = state
+    end
+)
+
+
+local c = Main:Tab('Game')
+local d = c:Section('Innocent')
+
+d:Create(
+    'button',
+    'Complete All',
+    function()
+        local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        for i,v in pairs(game:GetService("Workspace").Values.Tasks:GetChildren()) do
+            local Task = v.Name
+            for a,b in pairs(game.Workspace.Interact:GetChildren()) do
+                if b.Name == v.Name then
+                    if v:FindFirstChild('Targets') and v.Targets:FindFirstChild(game.Players.LocalPlayer.Name) then
+                        if v.Targets[game.Players.LocalPlayer.Name].Value < 100 then
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = b.Part.CFrame + Vector3.new(0,5,0)
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name])
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name], true, 0.75)
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name], true)
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name])
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name], true, 100)
+                            game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[b.Name], true)
+                        end
+                    end
+                end
+            end
+        end
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+    end
+)
+
+d:Create(
+    'button',
+    'Fix Sabotage',
+    function()
+        local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        for i,v in pairs(game.Workspace.Interact:GetChildren()) do
+            if v:FindFirstChild('Stats') then 
+                if v.Stats:FindFirstChild('Sabotaged') and v.Stats.Sabotaged.Value == true then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Part.CFrame + Vector3.new(0,5,0)
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name])
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name], true, 0.75)
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name], true)
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name])
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name], true, 100)
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact[v.Name], true)
+                end
+            end
+        end
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+    end
+)
+
+game:GetService('RunService').Stepped:connect(function()
+	if _G.AutoReport then
+	    for i, a in pairs(game.Workspace.Interact:GetChildren()) do
+            if a.Name == 'Corpse' then
+                if a:FindFirstChild('Corpse') and a.Corpse.Value ~= game.Players.LocalPlayer.Name then
+                    local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Interact.Corpse.Head.CFrame + Vector3.new(0,5,5)
+                    game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Interact.Corpse)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = pos
+                end
+            end
+	    end
+    end
+end)
+
+d:Create(
+    'toggle',
+    'Auto Report',
+    function(state)
+        _G.AutoReport = state
+    end
+)
+
+local tpPlayer = b:Section('Player Teleport')
+
+local Section = game.Players.LocalPlayer.PlayerGui.a.MainFrame.Folder.PlayersTab.ItemsContainer["Player TeleportSection"]
+local ItemsContainer = game.Players.LocalPlayer.PlayerGui.a.MainFrame.Folder.PlayersTab.ItemsContainer
+
+function reload()
+    for a,b in pairs(Section:GetChildren()) do
+        if b:IsA('TextLabel') and b.Name ~= 'SectionName' then
+            b:Destroy()
+            Section.Size = Section.Size - UDim2.new(0,0,0,22)
+	        ItemsContainer.CanvasSize = ItemsContainer.CanvasSize - UDim2.new(0,0,0,24)
+        end
+    end
+    for i,v in pairs(game.Workspace.Characters:GetChildren()) do
+        tpPlayer:Create('button', v.Name, function() 
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame
+        end)
+    end
+end
+spawn(function()
+    while true do
+        reload()
+        wait(5)
+    end
+end)
+
+local Imp = c:Section('Impostors')
+
+game:GetService('RunService').Stepped:connect(function()
+	if _G.KA then
+	    for i, v in pairs(game.Workspace.Characters:GetChildren()) do
+	        if v.Name == game.Players.LocalPlayer.Name then return end
+            if (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude < 8 then
+                game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Character[v.Name])
+                game:GetService("ReplicatedStorage").Network.Interact:InvokeServer(workspace.Character[v.Name])
+            end
+	    end
+    end
+end)
+
+Imp:Create(
+    'toggle',
+    'Kill Aura',
+    function(k)
+        _G.KA = k
+    end
+)

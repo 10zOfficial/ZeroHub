@@ -1,0 +1,315 @@
+game:GetService('RunService').Stepped:connect(function()
+	if _G.NoClip then
+		game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.Head.CanCollide = false
+		game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+	end
+end)
+
+game:GetService('RunService').Stepped:connect(function()
+	if _G.Teleporting then
+		game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
+		game.Players.LocalPlayer.Character.Head.CanCollide = false
+		game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+	end
+end)
+
+function round(num, numDecimalPlaces)
+    local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5) / mult
+end
+
+function InstantTeleport(CFrame)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame
+end
+
+function DragTeleport(CFrame)
+    
+    for i, v in pairs(game.Players.LocalPlayer.Character.HumanoidRootPart:GetChildren()) do
+        if v.Name == 'Teleport' then
+            v:Destroy()
+        end
+    end
+    
+    game.Players.LocalPlayer.Character.Humanoid.PlatformStand = true
+    
+    local X = round(CFrame.X, 0)
+    local Y = round(CFrame.Y, 0)
+    local Z = round(CFrame.Z, 0)
+    
+    local EndPosition = Vector3.new(X, Y, Z)
+    
+    local TeleportPosition = Instance.new('BodyPosition', game.Players.LocalPlayer.Character.HumanoidRootPart)
+        TeleportPosition.Position = EndPosition
+        TeleportPosition.Name = 'Teleport'
+        TeleportPosition.P = _G.AutoFarmStrength
+        TeleportPosition.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        
+    _G.Teleporting = true
+    
+    repeat wait(0.1) 
+    
+        local XP = round(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X)
+        local YP = round(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y)
+        local ZP = round(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)
+        
+        local Position = Vector3.new(XP, YP, ZP)
+        
+        if (EndPosition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 500 then
+            TeleportPosition.P = TeleportPosition.P*1.05
+        end
+        
+        if (EndPosition - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).magnitude <= 100 then
+           
+            _G.Teleporting = false
+    
+            TeleportPosition:Destroy()
+    
+            game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+            
+            return
+        end
+    
+    until Position == Vector3.new(X, Y, Z)
+    
+    _G.Teleporting = false
+    
+    TeleportPosition:Destroy()
+    
+    game.Players.LocalPlayer.Character.Humanoid.PlatformStand = false
+    
+end
+
+function Teleport(Method, Chosen)
+    
+    if not Method then return end
+    
+    if Method == 'Instant' then
+        InstantTeleport(CFrame.new(Chosen.X, Chosen.Y, Chosen.Z))
+    end
+    
+    if Method == 'Drag' then
+        DragTeleport(CFrame.new(Chosen.X, Chosen.Y, Chosen.Z))
+    end
+        
+end
+
+local lib = loadstring(game:HttpGet('http://tenz.ga/libraries/Zero'))()
+
+local ui = lib:Main('Zero Hub')
+local Player = ui:Tab('Players')
+local lp = Player:Section('Local Player')
+
+lp:Create(
+    'slider',
+    'WalkSpeed',
+    function(val)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = val
+    end,
+    {
+        min = 16,
+        max = 200
+    }
+)
+
+lp:Create(
+    'slider',
+    'JumpPower',
+    function(val)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = val
+    end,
+    {
+        min = 50,
+        max = 200
+    }
+)
+
+lp:Create(
+    'slider',
+    'Fly Speed',
+    function(val)
+        _G.FlySpeed = val
+    end,
+    {
+        min = 50,
+        max = 300
+    }
+)
+
+
+_G.FlySpeed = 50
+
+
+lp:Create(
+    'toggle',
+    'Fly',
+    function(state) -- Used from Calamity! Main credits to rocky2cmd!
+        repeat wait() until game.Players.LocalPlayer and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:findFirstChild("Head") and game.Players.LocalPlayer.Character:findFirstChild("Humanoid")
+		local Mouse = game.Players.LocalPlayer:GetMouse()
+		repeat wait() until Mouse
+		local Player = game.Players.LocalPlayer
+		local HumRoot = Player.Character.HumanoidRootPart
+		local Hum = Player.Character.Humanoid
+		isFlying = false
+		local SteerSpeed = _G.FlySpeed
+		local Steer = {f = 0, b = 0, l = 0, r = 0}
+		local BackSteer = {f = 0, b = 0, l = 0, r = 0}
+		local MaxSpeed = 2000
+	
+		function Fly()
+			local Gyro = Instance.new('BodyGyro', HumRoot)
+				Gyro.P = 9e4
+				Gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+				Gyro.CFrame = HumRoot.CFrame
+			local Velocity = Instance.new('BodyVelocity', HumRoot)
+				Velocity.Velocity = Vector3.new(0,0.1,0)
+				Velocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
+			repeat wait()
+				Hum.PlatformStand = true
+				if Steer.l + Steer.r ~= 0 or Steer.f + Steer.b ~= 0 then
+					SteerSpeed = _G.FlySpeed or 50
+					if SteerSpeed > MaxSpeed then
+						SteerSpeed = MaxSpeed
+					end
+				elseif not (Steer.l + Steer.r ~= 0 or Steer.f + Steer.b ~= 0) and speed ~= 0 then
+					SteerSpeed = SteerSpeed-50
+					if SteerSpeed < 0 then
+						SteerSpeed = 0    
+					end
+				end
+				if (Steer.l + Steer.r) ~= 0 or (Steer.f + Steer.b) ~= 0 then
+					Velocity.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (Steer.f+Steer.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(Steer.l+Steer.r,(Steer.f+Steer.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * SteerSpeed
+					BackSteer = {f = Steer.f ,b = Steer.b ,l = Steer.l, r = Steer.r}
+				elseif (Steer.l + Steer.r == 0 or Steer.f + Steer.b == 0) and SteerSpeed ~= 0 then
+					Velocity.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (BackSteer.f+BackSteer.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(BackSteer.l+BackSteer.r,(BackSteer.f+BackSteer.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * SteerSpeed
+				else
+					Velocity.Velocity = Vector3.new(0,0.1,0)
+				end
+				Gyro.CFrame = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((Steer.f+Steer.b)*50*SteerSpeed/MaxSpeed),0,0)
+			until not isFlying
+			local SteerSpeed = 0
+			local Steer = {F = 0,B = 0,L = 0,R = 0}
+			local BackSteer = {F = 0,B = 0,L = 0,R = 0}
+			Gyro:Destroy()
+			Velocity:Destroy()
+			Hum.PlatformStand = false
+		end
+	
+		local Mouse = Player:GetMouse()
+	
+		Mouse.KeyDown:Connect(function(Key)
+			if Key:lower() == "w" then
+				isWDown = true
+				Steer.f = 1
+			elseif Key:lower() == "a" then
+				isADown = true
+				Steer.l = -1
+			elseif Key:lower() == "s" then
+				isSDown = true
+				Steer.b = -1
+			elseif Key:lower() == "d" then
+				isSDown = true
+				Steer.r = 1
+			end
+		end)
+		Mouse.KeyUp:Connect(function(Key)
+			if Key:lower() == "w" then
+				isWDown = false
+				Steer.f = 0
+			elseif Key:lower() == "a" then
+				isADown = false
+				Steer.l = 0
+			elseif Key:lower() == "s" then
+				isSDown = false
+				Steer.b = 0
+			elseif Key:lower() == "d" then
+				isDDown = false
+				Steer.r = 0
+			end
+		end)
+	
+		if not state then
+			isFlying = false
+			HumRoot.BodyGyro:Destroy()
+			HumRoot.BodyVelocity:Destroy()
+			Hum.PlatformStand = false
+		else
+			isFlying = true
+			Fly()
+		end
+    end
+)
+
+lp:Create(
+    'toggle',
+    'NoClip',
+    function(state)
+        _G.NoClip = state
+    end
+)
+
+local af = ui:Tab('Farm')
+local section = af:Section('AutoFarm')
+
+section:Create(
+    'button',
+    'Farm Once',
+    function()
+        Teleport('Drag', CFrame.new(-40, 60, 11))
+        wait()
+        Teleport('Drag', CFrame.new(-40, 60, 8711))
+        wait()
+        Teleport('Drag', CFrame.new(-55, -350, 9560))
+    end
+)
+
+section:Create(
+    'slider',
+    'Farm Ammount',
+    function(v)
+        _G.AutoFarmAmmount = v
+    end,
+    {
+        min=1, max=100
+    }
+)
+
+section:Create(
+    'slider',
+    'Farm Speed',
+    function(v)
+       _G.AutoFarmStrength = v
+    end,
+    {
+        min=200, max=500
+    }
+)
+
+section:Create(
+    'toggle',
+    'Enabled',
+    function(v)
+        if v then
+            _G.Enabled = true
+            for i = 1, _G.AutoFarmAmmount do
+                if _G.Enabled then
+                    Teleport('Drag', CFrame.new(-40, 60, 11))
+                    wait()
+                    Teleport('Drag', CFrame.new(-40, 60, 8711))
+                    wait()
+                    Teleport('Drag', CFrame.new(-55, -350, 9560))
+                    wait(15)
+                end
+            end
+        else
+            _G.Enabled = false
+            game.Players.LocalPlayer.Character.Head:Destroy()
+        end
+    end
+)
+
+_G.FarmActive = false
+_G.AutoFarmAmmount = 1
+_G.AutoFarmStrength = 300
