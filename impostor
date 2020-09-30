@@ -7,7 +7,7 @@ game:GetService('RunService').Stepped:connect(function()
 	end
 end)
 
-local Ui = loadstring(game:HttpGet("http://tenz.ga/libraries/Zero"))()
+local Ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/10zOfficial/ZeroHub/master/Zero"))()
 local Main = Ui:Main('Zero Hub')
 local b = Main:Tab('Players')
 local a = b:Section('Local Player')
