@@ -96,7 +96,7 @@ function Teleport(Method, Chosen)
         
 end
 
-local lib = loadstring(game:HttpGet('http://tenz.ga/libraries/Zero'))()
+local lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/10zOfficial/ZeroHub/master/Zero'))()
 
 local ui = lib:Main('Zero Hub')
 local Player = ui:Tab('Players')
